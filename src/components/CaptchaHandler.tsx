@@ -7,35 +7,35 @@ import {
   TextField,
 } from "@mui/material"
 
-const CaptchaHandler = ({ value, url, valSetter, onSubmit, onCancel }) => (
-  <Dialog maxWidth="xs" open={url.length > 0}>
+const CaptchaHandler = ( props: { value: string, url: string, valSetter: any, onSubmit: any, onCancel: any }) => (
+  <Dialog maxWidth="xs" open={props.url.length > 0}>
     <DialogTitle>Captcha required</DialogTitle>
     <DialogContent>
       <Grid container alignItems="center" spacing={3}>
         <Grid item xs={12}>
-          <img src={url} alt="captcha" width={"100%"} />
+          <img src={props.url} alt="captcha" width={"100%"} />
         </Grid>
         <Grid item xs={12}>
           <TextField
             placeholder="Captcha"
             variant="outlined"
             fullWidth
-            value={value}
-            onChange={(e) => valSetter(e.target.value)}
+            value={props.value}
+            onChange={(e) => props.valSetter(e.target.value)}
           />
         </Grid>
         <Grid item xs={12}>
           <Button
             variant="contained"
             fullWidth
-            disabled={value.length === 0}
-            onClick={onSubmit}
+            disabled={props.value.length === 0}
+            onClick={props.onSubmit}
           >
             Submit
           </Button>
         </Grid>
         <Grid item xs={12}>
-          <Button variant="contained" fullWidth onClick={onCancel}>
+          <Button variant="contained" fullWidth onClick={props.onCancel}>
             Cancel
           </Button>
         </Grid>

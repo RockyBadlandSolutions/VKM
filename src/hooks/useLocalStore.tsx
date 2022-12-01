@@ -17,6 +17,7 @@ export function useLocalStore(key: string, defaultValue: string, storeName = ".v
   const timeoutRef = useRef<any>(null);
 
   // useLayoutEffect will be called before DOM paintings and before useEffect
+  // @ts-ignore
   useLayoutEffect(() => {
     let allow = true;
     store.get(key)

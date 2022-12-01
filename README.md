@@ -1,7 +1,40 @@
-# Tauri + React + Typescript
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+# VKM: VK Music Player
 
-## Recommended IDE Setup
+VKM это десктопный музыкальный плеер для VK.com, написанный на React с использованием Rust-tauri.
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+
+
+
+## Компиляция
+
+- Для начала проект нужно склонировать в любую папку
+- Для сборки нужны: yarn, Rust
+```bash
+  cd VKM
+  yarn && yarn tauri build
+```
+Результат будет в папке _VKM/src-tauri/target/release/bundle_
+    
+## Авторизация
+Для авторизации используется клиент _VK Admin for iOS_, и с помощью blank.html страницы получается токен пользователя с доступом к методам музыки
+
+Мы хотели получить нормальный токен для работы с музыкой, но поддержка ВК вежливо направила нас в нужное место
+## Функционал
+
+- [x]  Авторизация (через костыль)
+- [x]  Поиск музыки
+- [x]  Получение "Моей музыки"
+- [x]  Воспроизведение аудио
+- [x]  Получение обложек для превью
+- [x]  Плей/Пауза
+- [ ]  Переключение между треками
+- [ ]  Случайный порядок
+- [ ]  Повтор
+- [ ]  Плейлисты
+- [ ]  Рекомендации
+- [ ]  Нормальный прогрессбар для трека
+- [ ]  Нормальная Авторизация
+- [ ]  Музыка друзей
+- [ ]  Эквалайзер
+- [ ]  Темы оформления

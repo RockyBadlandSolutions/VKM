@@ -127,12 +127,12 @@ function Player() {
     }
   }
 
-  const positionChange = (e, val: any) => {
+  const positionChange = (e: any, val: any) => {
     console.log("positionChange", val)
     updateTime(val)
   }
 
-  const volumeChange = (e, val: any) => {
+  const volumeChange = (e: any, val: any) => {
     updateVolume(val)
     console.log("volumeChange", val)
   }
