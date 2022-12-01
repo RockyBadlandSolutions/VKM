@@ -8,7 +8,7 @@ import VKSans from "./public/fonts/vk-sans.woff"
 import VKSansWoff2 from "./public/fonts/vk-sans.woff2"
 import App from "./App"
 import "./index.css"
-import { store } from "./store/store"
+import store from "./store/store"
 
 const theme = createTheme({
   palette: {

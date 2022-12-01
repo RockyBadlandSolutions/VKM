@@ -18,10 +18,10 @@ import {
   Icon24SkipForward,
 } from "@vkontakte/icons"
 import { useEffect, useState } from "react"
-import { useAppSelector } from "../store/hooks"
+import { useAppSelector, useAppDispatch } from "../store/store"
 import useAudio from "../hooks/useAudio"
-import { store } from "../store/store"
-import { updatePlayerAction } from "../store/playerReducer"
+import { updatePaused } from "../store/playerStateSlice"
+import { Audio as AudioType } from "../API/audio"
 
 const sxStyles = {
   row: {
@@ -67,7 +67,8 @@ const sxStyles = {
 }
 
 function Player() {
-  const currentSong = useAppSelector((state) => state.currentSong)
+  const dispatch = useAppDispatch()
+  const currentSong = useAppSelector((state) => state.playerState.currentSong) as AudioType
 
   const [repeatMode, setRepeatMode] = useState(0)
   const [shuffle, setShuffle] = useState(false)
@@ -88,7 +89,7 @@ function Player() {
       if (player) {
         player.src = currentSong.url
         play()
-        store.dispatch(updatePlayerAction({ paused: false }))
+        dispatch(updatePaused(false))
       }
     }
   }, [currentSong])
@@ -103,10 +104,10 @@ function Player() {
   const onPause = () => {
     if (playing) {
       pause()
-      store.dispatch(updatePlayerAction({ paused: true }))
+      dispatch(updatePaused(true))
     } else {
       play()
-      store.dispatch(updatePlayerAction({ paused: false }))
+      dispatch(updatePaused(false))
     }
   }
 

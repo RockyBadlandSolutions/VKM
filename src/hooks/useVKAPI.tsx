@@ -1,19 +1,20 @@
 import { AuthorizedAPI } from "../API"
 import useLocalStore from "./useLocalStore"
 import { useEffect, useState } from "react";
-import { store as reduxst } from "../store/store"
-import { updateUserLoginAction } from "../store/currentUserReducer"
+import { useAppDispatch } from "../store/store"
+import { updateLoggedIn } from "../store/appStateSlice";
 
 let vkAPIInstance: null | AuthorizedAPI = null;
 let rps = 0;
 
 const useVKAPI = () => {
   // const isLoggedIn = useAppSelector((state) => state.currentUser).logged_in
-  const [store, setStore] = useLocalStore("token", "", ".vkm");
+  const dispatch = useAppDispatch();
+  const [localStore, setLocalStore] = useLocalStore("token", "", ".vkm");
   const [vkAPI, setVKAPI] = useState<AuthorizedAPI | null >(null)
 
   useEffect(() => {
-    if (!store) {
+    if (!localStore) {
       console.log("store is null")
       return;
     } else {
@@ -23,7 +24,7 @@ const useVKAPI = () => {
         return;
       }
       console.log("store is not null")
-      const api = new AuthorizedAPI(store);
+      const api = new AuthorizedAPI(localStore);
 
       if (rps > 5) {
         console.log("Too many requests")
@@ -32,23 +33,23 @@ const useVKAPI = () => {
         rps += 1;
         vkAPIInstance = api;
         setVKAPI(api);
-        reduxst.dispatch(updateUserLoginAction(true))
+        dispatch(updateLoggedIn(true));
       }).catch(e => {
         rps += 1;
         console.log("error", e)
         vkAPIInstance = null;
         setVKAPI(null);
-        reduxst.dispatch(updateUserLoginAction(false))
+        dispatch(updateLoggedIn(false));
       })
     }
-  }, [store])
+  }, [localStore])
 
   const updateVKAPI = (token: string) => {
-    setStore(token)
+    setLocalStore(token)
   }
 
   const logout = () => {
-    setStore("")
+    setLocalStore("")
   }
 
   return [vkAPI, updateVKAPI, logout] as const;

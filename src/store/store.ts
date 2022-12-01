@@ -1,19 +1,18 @@
-import { combineReducers, createStore } from "redux"
-import { currentSongReducer } from "./currentSongReducer"
-import { playerReducer } from "./playerReducer"
-import { currentScreenReducer } from "./currentScreenReducer"
-import { searchReducer } from "./searchReducer"
-import { currentUserReducer } from "./currentUserReducer"
+import { configureStore } from "@reduxjs/toolkit";
+import playerStateSlice from "./playerStateSlice";
+import appStateSlice from "./appStateSlice";
+import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux"
 
-const rootReducer = combineReducers({
-  player: playerReducer,
-  currentSong: currentSongReducer,
-  currentScreen: currentScreenReducer,
-  search: searchReducer,
-  currentUser: currentUserReducer,
-})
+const store = configureStore({
+  reducer: {
+    playerState: playerStateSlice,
+    appState: appStateSlice,
+  },
+});
 
-export const store = createStore(rootReducer)
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+export const useAppDispatch = () => useDispatch<AppDispatch>();
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector
 
-export type RootState = ReturnType<typeof store.getState>
-export type AppDispatch = typeof store.dispatch
+export default store;

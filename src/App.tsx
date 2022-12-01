@@ -26,10 +26,8 @@ import Login from "./screens/Login"
 import MyMusic from "./screens/MyMusic"
 import Search from "./screens/Search"
 import Settings from "./screens/Settings"
-import { updateScreenAction } from "./store/currentScreenReducer"
-import { useAppSelector } from "./store/hooks"
-import { searchAction } from "./store/searchReducer"
-import { store } from "./store/store"
+import { updateScreen, updateSearch } from "./store/appStateSlice"
+import { useAppDispatch, useAppSelector } from "./store/store"
 
 const sxStyles = {
   player: {
@@ -55,8 +53,9 @@ const sxStyles = {
 }
 
 function App() {
-  const currentScreen = useAppSelector((state) => state.currentScreen).screen
-  const isLoggedIn = useAppSelector((state) => state.currentUser).logged_in
+  const dispatch = useAppDispatch()
+  const currentScreen = useAppSelector((state) => state.appState.screen)
+  const isLoggedIn = useAppSelector((state) => state.appState.logged_in)
   const [api] = useVKAPI()
   // const isLoggedIn = true;
   const screens = [
@@ -80,7 +79,6 @@ function App() {
     },
   ]
 
-
   const [captcha, setCaptcha] = useState("")
   const [captchaValue, setCaptchaValue] = useState("")
   const [searchVal, setSearchVal] = useState("")
@@ -91,8 +89,8 @@ function App() {
   }, [isLoggedIn, api])
 
   const onSearch = () => {
-    store.dispatch(searchAction(searchVal))
-    store.dispatch(updateScreenAction("search"))
+    dispatch(updateSearch(searchVal))
+    dispatch(updateScreen("search"))
     setSearchVal("")
   }
 
@@ -137,7 +135,7 @@ function App() {
                   <ListItem
                     key={screen.id}
                     onClick={() =>
-                      store.dispatch(updateScreenAction(screen.id))
+                      dispatch(updateScreen(screen.id))
                     }
                     button
                     selected={screen.id === currentScreen}

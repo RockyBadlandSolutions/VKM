@@ -9,15 +9,14 @@ import {
   Skeleton,
 } from "@mui/material"
 import { Icon24Play } from "@vkontakte/icons"
-import { useAppSelector } from "../store/hooks"
+import { useAppSelector, useAppDispatch } from "../store/store"
 import { Audio } from "../API/audio"
-import {store} from "../store/store"
-import { updateSongAction } from "../store/currentSongReducer"
 import useVKAPI from "../hooks/useVKAPI"
+import { updateCurrentSong } from "../store/playerStateSlice"
 
 
 function SongList(props : { songs: Audio[], loading: boolean }) {
-  const currentSong = useAppSelector((state) => state.currentSong)
+  const currentSong = useAppSelector((state) => state.playerState.currentSong) as Audio
 
   return (
     <List sx={{ maxHeight: "calc(100vh - 8vh)", overflow: "auto" }}>
@@ -37,12 +36,13 @@ function SongList(props : { songs: Audio[], loading: boolean }) {
 }
 
 const SongEntity = (props: { audio: Audio; playing: boolean }) => {
+  const dispatch = useAppDispatch()
   const [api, _] = useVKAPI();
   const onSongClick = () => {
     if (api) {
       api.audioGetById([props.audio.owner_id.toString() + "_" +props.audio.id.toString()])
         .then((r) => {
-          store.dispatch(updateSongAction(r[0]))
+          dispatch(updateCurrentSong(r[0]))
         })
     }
   }
