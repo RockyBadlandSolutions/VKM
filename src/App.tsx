@@ -18,9 +18,10 @@ import {
   Icon28Search,
   Icon28Settings,
 } from "@vkontakte/icons"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import CaptchaHandler from "./components/CaptchaHandler"
 import Player from "./components/Player"
+import useVKAPI from "./hooks/useVKAPI"
 import Login from "./screens/Login"
 import MyMusic from "./screens/MyMusic"
 import Search from "./screens/Search"
@@ -56,6 +57,7 @@ const sxStyles = {
 function App() {
   const currentScreen = useAppSelector((state) => state.currentScreen).screen
   const isLoggedIn = useAppSelector((state) => state.currentUser).logged_in
+  const [api] = useVKAPI()
   // const isLoggedIn = true;
   const screens = [
     {
@@ -83,6 +85,11 @@ function App() {
   const [captchaValue, setCaptchaValue] = useState("")
   const [searchVal, setSearchVal] = useState("")
 
+  useEffect(() => {
+    console.log("Login status", isLoggedIn)
+    console.log("Current screen", currentScreen)
+  }, [isLoggedIn, api])
+
   const onSearch = () => {
     store.dispatch(searchAction(searchVal))
     store.dispatch(updateScreenAction("search"))
@@ -90,7 +97,7 @@ function App() {
   }
 
 
-  if (isLoggedIn) {
+  if (isLoggedIn && api) {
     return (
       <Box sx={{ display: "flex" }}>
         <Drawer sx={sxStyles.drawer} variant={"permanent"} anchor={"left"}>

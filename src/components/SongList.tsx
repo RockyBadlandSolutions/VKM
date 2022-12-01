@@ -11,7 +11,6 @@ import {
 import { Icon24Play } from "@vkontakte/icons"
 import { useAppSelector } from "../store/hooks"
 import { Audio } from "../API/audio"
-import {AuthorizedAPI} from "../API"
 import {store} from "../store/store"
 import { updateSongAction } from "../store/currentSongReducer"
 import useVKAPI from "../hooks/useVKAPI"

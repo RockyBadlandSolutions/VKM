@@ -4,12 +4,14 @@ import {
   Icon28PaintRollerOutline,
   Icon28PollSquareOutline,
 } from "@vkontakte/icons"
+import useVKAPI from "../hooks/useVKAPI"
 
 function Settings() {
+  const [_, sv, logout] = useVKAPI()
   const settings = [
     {
       name: "Logout",
-      action: null,
+      action: () => logout(),
       icon: <Icon28DoorArrowRightOutline />,
     },
     {

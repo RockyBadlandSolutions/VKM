@@ -68,7 +68,6 @@ export class AuthorizedAPI extends API {
   }
 
   async userGet(): Promise<any> {
-    console.log("Authorized API", this.token)
     const response = await this.request<User[]>("users.get")
     return response
   }
