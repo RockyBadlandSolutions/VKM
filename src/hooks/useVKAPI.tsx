@@ -34,6 +34,7 @@ const useVKAPI = () => {
         vkAPIInstance = api;
         setVKAPI(api);
         dispatch(updateLoggedIn(true));
+        console.log("Logged in")
       }).catch(e => {
         rps += 1;
         console.log("error", e)
@@ -50,6 +51,7 @@ const useVKAPI = () => {
 
   const logout = () => {
     setLocalStore("")
+    dispatch(updateLoggedIn(false));
   }
 
   return [vkAPI, updateVKAPI, logout] as const;

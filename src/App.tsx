@@ -28,6 +28,7 @@ import Search from "./screens/Search"
 import Settings from "./screens/Settings"
 import { updateScreen, updateSearch } from "./store/appStateSlice"
 import { useAppDispatch, useAppSelector } from "./store/store"
+import useLocalStore from "./hooks/useLocalStore"
 
 const sxStyles = {
   player: {
@@ -57,6 +58,8 @@ function App() {
   const currentScreen = useAppSelector((state) => state.appState.screen)
   const isLoggedIn = useAppSelector((state) => state.appState.logged_in)
   const [api] = useVKAPI()
+  const [loginState, setLoginState] = useState(false)
+  const [localStore] = useLocalStore("token", "", ".vkm");
   // const isLoggedIn = true;
   const screens = [
     {
@@ -85,8 +88,8 @@ function App() {
 
   useEffect(() => {
     console.log("Login status", isLoggedIn)
-    console.log("Current screen", currentScreen)
-  }, [isLoggedIn, api])
+    setLoginState(isLoggedIn)
+  }, [isLoggedIn, api, localStore])
 
   const onSearch = () => {
     dispatch(updateSearch(searchVal))
@@ -95,7 +98,7 @@ function App() {
   }
 
 
-  if (isLoggedIn && api) {
+  if (loginState) {
     return (
       <Box sx={{ display: "flex" }}>
         <Drawer sx={sxStyles.drawer} variant={"permanent"} anchor={"left"}>
