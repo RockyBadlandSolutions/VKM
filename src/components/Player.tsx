@@ -275,11 +275,6 @@ function Player() {
                 />
                 <Icon20VolumeOutline style={{...sxStyles.positiveButton, paddingLeft: "3px"}} />
               </Box>
-              {/* <Box sx={{...sxStyles.volumeContainer, marginLeft: "20px"}}>
-                
-
-
-              </Box> */}
             </Box>
           </Grid>
         </Grid>
