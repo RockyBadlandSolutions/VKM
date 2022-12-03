@@ -143,7 +143,13 @@ function App() {
           </Box>
         </Box>
 
-        <Box sx={{ height: "165px" }}>
+        <Box sx={{ 
+          height: "160px", 
+          position: "absolute", 
+          bottom: 0, 
+          width: "100vw",
+          backgroundColor: "#fff",
+        }}>
           <Divider />
           <Player />
         </Box>

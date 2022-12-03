@@ -16,10 +16,6 @@ import { updatePaused } from "../store/playerStateSlice"
 import { useAppDispatch, useAppSelector } from "../store/store"
 
 const sxStyles = {
-  row: {
-    display: "flex",
-    flexDirection: "row",
-  },
   trackSlider: {
     color: "#0077ff",
     marginLeft: "1rem",
@@ -29,7 +25,6 @@ const sxStyles = {
     color: "#0077ff",
     cursor: "pointer",
   },
-  functionButtonTopMargin: {},
 }
 
 function Player() {
@@ -119,9 +114,6 @@ function Player() {
       return (
         <IconButton
           onClick={onRepeat}
-          sx={{
-            ...sxStyles.functionButtonTopMargin,
-          }}
           disableRipple
         >
           <Icon24RepeatOne style={sxStyles.positiveButton} />
@@ -131,9 +123,6 @@ function Player() {
       return (
         <IconButton
           onClick={onRepeat}
-          sx={{
-            ...sxStyles.functionButtonTopMargin,
-          }}
           disableRipple
         >
           <Icon24Repeat
@@ -148,9 +137,6 @@ function Player() {
     return (
       <IconButton
         onClick={onShuffle}
-        sx={{
-          ...sxStyles.functionButtonTopMargin,
-        }}
         disableRipple
       >
         <Icon24Shuffle style={shuffle ? sxStyles.positiveButton : {}} />
@@ -194,20 +180,9 @@ function Player() {
             flexGrow: 1,
             display: "flex",
             justifyContent: "center",
-            // alignItems: "center",
             flexDirection: "column",
           }}
         >
-          {/* <Stack direction="row" sx={{ display: "flex", alignItems: "center" }}>
-            <Typography variant="subtitle1" noWrap>
-              {songName}
-            </Typography>
-
-            <Typography variant="subtitle2" noWrap>
-              {songArtist}
-            </Typography>
-          </Stack> */}
-
           <Typography variant="h6" noWrap>
             {songName}
           </Typography>
@@ -260,10 +235,6 @@ function Player() {
             </Box>
 
             <ShuffleButton />
-
-            {/* <Box sx={{...sxStyles.volumeContainer, marginLeft: "20px"}}>
-
-              </Box> */}
           </Box>
         </Box>
 
