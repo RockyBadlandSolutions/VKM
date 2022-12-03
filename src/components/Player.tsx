@@ -29,40 +29,17 @@ const sxStyles = {
     flexDirection: "row",
   },
   trackSlider: {
-    marginLeft: "1em",
-    marginRight: "1em",
-    width: "30vw",
-    marginTop: "2px",
+    width: "55vw",
     color: "#0077ff",
+    marginLeft: "1rem",
+    marginRight: "1rem",
   },
-  infoTextContainer: {
-    display: "flex",
-    flexDirection: "column",
-    marginLeft: "1em",
-  },
-
   positiveButton: {
     color: "#0077ff",
     cursor: "pointer",
   },
-  loading: {
-    marginLeft: "1em",
-    marginRight: "1em",
-    width: "40vw",
-    marginTop: "0.9em",
-  },
   functionButtonTopMargin: {
-    marginTop: "-3px",
-  },
-  volume: {
-    width: "5vw",
-    paddingTop: "19px",
-    marginLeft: "3px",
-  },
-  volumeContainer: {
-    display: "flex",
-    flexDirection: "row",
-    paddingTop: "3px",
+    marginTop: "2px",
   },
 }
 
@@ -84,11 +61,11 @@ function Player() {
     if (currentSong.title) {
       setSongName(currentSong.title)
       setSongArtist(currentSong.artist)
-      setArtworkURL(currentSong.album?.thumb?.photo_68 as string)
+      setArtworkURL(currentSong.album?.thumb?.photo_1200 as string)
       setDuration(currentSong.duration)
       if (player) {
         player.src = currentSong.url
-        play()
+        // play()
         dispatch(updatePaused(false))
       }
     }
@@ -138,13 +115,11 @@ function Player() {
   }
 
   const RepeatButton = () => {
-    const margin = "0.5em"
     if (repeatMode === 1) {
       return (
         <IconButton
           onClick={onRepeat}
           sx={{
-            marginRight: margin,
             ...sxStyles.functionButtonTopMargin,
           }}
           disableRipple
@@ -157,7 +132,6 @@ function Player() {
         <IconButton
           onClick={onRepeat}
           sx={{
-            marginRight: margin,
             ...sxStyles.functionButtonTopMargin,
           }}
           disableRipple
@@ -175,7 +149,6 @@ function Player() {
       <IconButton
         onClick={onShuffle}
         sx={{
-          marginLeft: "0.5em",
           ...sxStyles.functionButtonTopMargin,
         }}
         disableRipple
@@ -206,34 +179,73 @@ function Player() {
   } else {
     return (
       <Box>
+        <Avatar
+          variant="square"
+          src={artworkURL}
+          sx={{
+            position: "absolute",
+            width: "150px",
+            height: "150px",
+            bottom: "0",
+          }}
+        />
         <Grid
           container
-          spacing={2}
           alignContent="center"
           alignItems={"center"}
-          direction="row"
+          direction="column"
+          sx={{
+            paddingLeft: "140px"
+          }}
         >
-          <Grid item>
-            <Avatar
-              variant="rounded"
-              src={artworkURL}
-              sx={{ marginLeft: "1em" }}
-            />
-          </Grid>
-          <Grid item>
-            <Box sx={{ width: "7em" }}>
+          <Grid container direction={"row"} spacing={1} alignItems="center" sx={{
+            paddingTop: "1em",
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+          }}>
+            <Grid item>
               <Typography variant="subtitle1" noWrap>
                 {songName}
               </Typography>
-
-              <Typography variant="subtitle2" noWrap>
+            </Grid>
+            <Grid item>
+              <Typography variant="subtitle2" noWrap sx={{paddingTop: "3px"}}>
                 {songArtist}
               </Typography>
-            </Box>
+            </Grid>
+          </Grid>
+          <Grid item sx={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+          }}>
+            <Typography variant="overline">
+              {displayTime(currentTime)}
+            </Typography>
+            <Slider
+              key={currentTime}
+              size="small"
+              max={duration}
+              defaultValue={currentTime}
+              valueLabelFormat={displayTime}
+              valueLabelDisplay="auto"
+              sx={sxStyles.trackSlider}
+              onChangeCommitted={positionChange}
+            />
+            <Typography variant="overline">
+              {"−" + displayTime(duration - currentTime)}
+            </Typography>
           </Grid>
 
           <Grid item>
-            <Box sx={{ marginTop: "0.3em" }}>
+            <Box sx={{
+              paddingLeft: "2em",
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+            }} >
+              <RepeatButton />
               <IconButton size="large">
                 <Icon24SkipBack style={sxStyles.positiveButton} />
               </IconButton>
@@ -243,48 +255,31 @@ function Player() {
               <IconButton size="large">
                 <Icon24SkipForward style={sxStyles.positiveButton} />
               </IconButton>
-            </Box>
-          </Grid>
-
-          <Grid item>
-            <Box sx={{ ...sxStyles.row, marginTop: "0.5em" }}>
-              <RepeatButton />
-
-              <Typography variant="overline">
-                {displayTime(currentTime)}
-              </Typography>
-              <Slider
-                key={currentTime}
-                size="small"
-                max={duration}
-                defaultValue={currentTime}
-                valueLabelFormat={displayTime}
-                valueLabelDisplay="auto"
-                sx={sxStyles.trackSlider}
-                onChangeCommitted={positionChange}
-              />
-              <Typography variant="overline">
-                {"−" + displayTime(duration - currentTime)}
-              </Typography>
-
               <ShuffleButton />
-            </Box>
-          </Grid>
+              <Box sx={{
+                position: "absolute",
+                right: "1vw",
+                bottom: "1.3em",
+              }}
+              >
+                <Slider
+                  size={"small"}
+                  onChange={volumeChange}
+                  value={volume}
+                  max={1}
+                  step={0.01}
+                  orientation="vertical"
+                  sx={{
+                    height: "75px",
+                  }}
+                />
+                <Icon20VolumeOutline style={{...sxStyles.positiveButton, paddingLeft: "3px"}} />
+              </Box>
+              {/* <Box sx={{...sxStyles.volumeContainer, marginLeft: "20px"}}>
+                
 
-          <Grid item>
-            <Box sx={sxStyles.volumeContainer}>
-              <IconButton disableRipple disabled>
-                <Icon20VolumeOutline style={sxStyles.positiveButton} />
-              </IconButton>
 
-              <Slider
-                sx={sxStyles.volume}
-                size={"small"}
-                onChange={volumeChange}
-                value={volume}
-                max={1}
-                step={0.1}
-              />
+              </Box> */}
             </Box>
           </Grid>
         </Grid>

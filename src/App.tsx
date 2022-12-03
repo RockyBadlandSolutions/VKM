@@ -36,7 +36,7 @@ const sxStyles = {
     bottom: 0,
     backgroundColor: "white",
     width: "100%",
-    height: "70px",
+    height: "150px",
     paddingBottom: 0,
     marginBottom: 0,
     zIndex: 9999,
