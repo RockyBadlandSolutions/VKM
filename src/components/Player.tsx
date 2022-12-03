@@ -1,12 +1,4 @@
-import React from "react"
-import {
-  Avatar,
-  Box,
-  Grid,
-  IconButton,
-  Slider,
-  Typography,
-} from "@mui/material"
+import { Avatar, Box, IconButton, Slider, Typography } from "@mui/material"
 import {
   Icon20VolumeOutline,
   Icon24PauseCircle,
@@ -18,10 +10,10 @@ import {
   Icon24SkipForward,
 } from "@vkontakte/icons"
 import { useEffect, useState } from "react"
-import { useAppSelector, useAppDispatch } from "../store/store"
+import { Audio as AudioType } from "../API/audio"
 import useAudio from "../hooks/useAudio"
 import { updatePaused } from "../store/playerStateSlice"
-import { Audio as AudioType } from "../API/audio"
+import { useAppDispatch, useAppSelector } from "../store/store"
 
 const sxStyles = {
   row: {
@@ -29,7 +21,6 @@ const sxStyles = {
     flexDirection: "row",
   },
   trackSlider: {
-    width: "55vw",
     color: "#0077ff",
     marginLeft: "1rem",
     marginRight: "1rem",
@@ -38,14 +29,14 @@ const sxStyles = {
     color: "#0077ff",
     cursor: "pointer",
   },
-  functionButtonTopMargin: {
-    marginTop: "2px",
-  },
+  functionButtonTopMargin: {},
 }
 
 function Player() {
   const dispatch = useAppDispatch()
-  const currentSong = useAppSelector((state) => state.playerState.currentSong) as AudioType
+  const currentSong = useAppSelector(
+    (state) => state.playerState.currentSong
+  ) as AudioType
 
   const [repeatMode, setRepeatMode] = useState(0)
   const [shuffle, setShuffle] = useState(false)
@@ -55,7 +46,16 @@ function Player() {
   const [songArtist, setSongArtist] = useState("")
   const [artworkURL, setArtworkURL] = useState("")
 
-  const [playing, currentTime, volume, play, pause, updateTime, updateVolume, player] = useAudio(currentSong?.url)
+  const [
+    playing,
+    currentTime,
+    volume,
+    play,
+    pause,
+    updateTime,
+    updateVolume,
+    player,
+  ] = useAudio(currentSong?.url)
 
   useEffect(() => {
     if (currentSong.title) {
@@ -161,13 +161,13 @@ function Player() {
   const PlayButton = () => {
     if (playing) {
       return (
-        <IconButton size="large" onClick={onPause} disableRipple>
+        <IconButton size="medium" onClick={onPause} disableRipple>
           <Icon24PauseCircle style={sxStyles.positiveButton} />
         </IconButton>
       )
     } else {
       return (
-        <IconButton size="large" onClick={onPause} disableRipple>
+        <IconButton size="medium" onClick={onPause} disableRipple>
           <Icon24PlayCircle style={sxStyles.positiveButton} />
         </IconButton>
       )
@@ -178,51 +178,49 @@ function Player() {
     return <PlayerNotAvailable />
   } else {
     return (
-      <Box>
+      <Box sx={{ display: "flex" }}>
         <Avatar
           variant="square"
           src={artworkURL}
           sx={{
-            position: "absolute",
-            width: "150px",
-            height: "150px",
-            bottom: "0",
+            width: "165px",
+            height: "165px",
           }}
         />
-        <Grid
-          container
-          alignContent="center"
-          alignItems={"center"}
-          direction="column"
+
+        <Box
           sx={{
-            paddingLeft: "140px"
+            p: 2,
+            flexGrow: 1,
+            display: "flex",
+            justifyContent: "center",
+            // alignItems: "center",
+            flexDirection: "column",
           }}
         >
-          <Grid container direction={"row"} spacing={1} alignItems="center" sx={{
-            paddingTop: "1em",
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "center",
-          }}>
-            <Grid item>
-              <Typography variant="subtitle1" noWrap>
-                {songName}
-              </Typography>
-            </Grid>
-            <Grid item>
-              <Typography variant="subtitle2" noWrap sx={{paddingTop: "3px"}}>
-                {songArtist}
-              </Typography>
-            </Grid>
-          </Grid>
-          <Grid item sx={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-          }}>
+          {/* <Stack direction="row" sx={{ display: "flex", alignItems: "center" }}>
+            <Typography variant="subtitle1" noWrap>
+              {songName}
+            </Typography>
+
+            <Typography variant="subtitle2" noWrap>
+              {songArtist}
+            </Typography>
+          </Stack> */}
+
+          <Typography variant="h6" noWrap>
+            {songName}
+          </Typography>
+
+          <Typography variant="subtitle1" noWrap>
+            {songArtist}
+          </Typography>
+
+          <Box sx={{ display: "flex", alignItems: "center" }}>
             <Typography variant="overline">
               {displayTime(currentTime)}
             </Typography>
+
             <Slider
               key={currentTime}
               size="small"
@@ -233,61 +231,79 @@ function Player() {
               sx={sxStyles.trackSlider}
               onChangeCommitted={positionChange}
             />
+
             <Typography variant="overline">
               {"−" + displayTime(duration - currentTime)}
             </Typography>
-          </Grid>
+          </Box>
 
-          <Grid item>
-            <Box sx={{
-              paddingLeft: "2em",
+          <Box
+            sx={{
               display: "flex",
               flexDirection: "row",
+              justifyContent: "space-between",
               alignItems: "center",
-            }} >
-              <RepeatButton />
-              <IconButton size="large">
+            }}
+          >
+            <RepeatButton />
+
+            <Box>
+              <IconButton size="medium">
                 <Icon24SkipBack style={sxStyles.positiveButton} />
               </IconButton>
 
               <PlayButton />
 
-              <IconButton size="large">
+              <IconButton size="medium">
                 <Icon24SkipForward style={sxStyles.positiveButton} />
               </IconButton>
-              <ShuffleButton />
-              <Box sx={{
-                position: "absolute",
-                right: "1vw",
-                bottom: "1.3em",
-              }}
-              >
-                <Slider
-                  size={"small"}
-                  onChange={volumeChange}
-                  value={volume}
-                  max={1}
-                  step={0.01}
-                  orientation="vertical"
-                  sx={{
-                    height: "75px",
-                  }}
-                />
-                <Icon20VolumeOutline style={{...sxStyles.positiveButton, paddingLeft: "3px"}} />
-              </Box>
             </Box>
-          </Grid>
-        </Grid>
+
+            <ShuffleButton />
+
+            {/* <Box sx={{...sxStyles.volumeContainer, marginLeft: "20px"}}>
+
+              </Box> */}
+          </Box>
+        </Box>
+
+        <Box
+          sx={{
+            p: 2,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Slider
+            size={"small"}
+            onChange={volumeChange}
+            value={volume}
+            max={1}
+            step={0.01}
+            orientation="vertical"
+            sx={{
+              height: "75px",
+            }}
+          />
+          <Icon20VolumeOutline style={sxStyles.positiveButton} />
+        </Box>
       </Box>
     )
   }
 }
 
 const PlayerNotAvailable = () => (
-  <Box sx={{ textAlign: "center" }}>
-    <Typography variant="h5" sx={{ width: "100%", paddingTop: "0.5em" }}>
-      Nothing to play
-    </Typography>
+  <Box
+    sx={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "100%",
+    }}
+  >
+    <Typography variant="h5">Nothing to play</Typography>
   </Box>
 )
 

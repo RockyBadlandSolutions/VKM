@@ -4,12 +4,13 @@ import {
   Drawer,
   Grid,
   IconButton,
-  Input,
   InputAdornment,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
+  TextField,
+  Toolbar,
   Typography,
 } from "@mui/material"
 import {
@@ -21,6 +22,7 @@ import {
 import { useEffect, useState } from "react"
 import CaptchaHandler from "./components/CaptchaHandler"
 import Player from "./components/Player"
+import useLocalStore from "./hooks/useLocalStore"
 import useVKAPI from "./hooks/useVKAPI"
 import Login from "./screens/Login"
 import MyMusic from "./screens/MyMusic"
@@ -28,28 +30,21 @@ import Search from "./screens/Search"
 import Settings from "./screens/Settings"
 import { updateScreen, updateSearch } from "./store/appStateSlice"
 import { useAppDispatch, useAppSelector } from "./store/store"
-import useLocalStore from "./hooks/useLocalStore"
+
+const drawerWidth = 200
 
 const sxStyles = {
-  player: {
-    position: "fixed",
-    bottom: 0,
-    backgroundColor: "white",
-    width: "100%",
-    height: "150px",
-    paddingBottom: 0,
-    marginBottom: 0,
-    zIndex: 9999,
-  },
   drawer: {
-    width: 200,
+    width: drawerWidth,
+    flexShrink: 0,
+    "& .MuiDrawer-paper": {
+      width: drawerWidth,
+      boxSizing: "border-box",
+      height: "calc(100vh - 165px)",
+    },
   },
   positive: {
     color: "#0077ff",
-  },
-  screen: {
-    maxHeight: "calc(100vh - 70px)",
-    flexGrow: 1,
   },
 }
 
@@ -59,7 +54,7 @@ function App() {
   const isLoggedIn = useAppSelector((state) => state.appState.logged_in)
   const [api] = useVKAPI()
   const [loginState, setLoginState] = useState(false)
-  const [localStore] = useLocalStore("token", "", ".vkm");
+  const [localStore] = useLocalStore("token", "", ".vkm")
   // const isLoggedIn = true;
   const screens = [
     {
@@ -97,49 +92,41 @@ function App() {
     setSearchVal("")
   }
 
-
   if (loginState) {
     return (
-      <Box sx={{ display: "flex" }}>
-        <Drawer sx={sxStyles.drawer} variant={"permanent"} anchor={"left"}>
-          <Grid
-            container
-            sx={sxStyles.drawer}
-            spacing={1}
-            justifyContent={"center"}
-          >
-            <Grid item xs={11}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  flexDirection: "column",
-                }}
-              >
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+        <Box sx={{ display: "flex", flexGrow: 1 }}>
+          <Drawer sx={sxStyles.drawer} variant={"permanent"}>
+            <Toolbar>
+              <Grid container justifyContent="center">
                 <Typography variant="h5">VKM</Typography>
-                <Input
-                  size="small"
-                  fullWidth
-                  sx={{ margin: 1 }}
-                  endAdornment={
+              </Grid>
+            </Toolbar>
+            <Divider />
+
+            <List sx={{ p: 1 }}>
+              <TextField
+                variant="outlined"
+                size="small"
+                value={searchVal}
+                onChange={(e) => setSearchVal(e.target.value)}
+                placeholder="Search"
+                InputProps={{
+                  endAdornment: (
                     <InputAdornment position="end">
                       <IconButton onClick={onSearch}>
-                        <Icon16Search style={sxStyles.positive} />
+                        <Icon16Search />
                       </IconButton>
                     </InputAdornment>
-                  }
-                  onChange={(e) => setSearchVal(e.target.value)}
-                />
-              </Box>
-            </Grid>
-            <Grid item xs={12}>
-              <List>
+                  ),
+                }}
+              />
+
+              <Box sx={{ mt: 1 }}>
                 {screens.map((screen) => (
                   <ListItem
                     key={screen.id}
-                    onClick={() =>
-                      dispatch(updateScreen(screen.id))
-                    }
+                    onClick={() => dispatch(updateScreen(screen.id))}
                     button
                     selected={screen.id === currentScreen}
                   >
@@ -147,17 +134,20 @@ function App() {
                     <ListItemText primary={screen.name} />
                   </ListItem>
                 ))}
-              </List>
-            </Grid>
-          </Grid>
-        </Drawer>
-        <div style={sxStyles.screen}>
-          {screens.filter((id) => id.id === currentScreen)[0].screen}
-        </div>
-        <Box sx={sxStyles.player}>
+              </Box>
+            </List>
+          </Drawer>
+
+          <Box component="main" sx={{ flexGrow: 1 }}>
+            {screens.filter((id) => id.id === currentScreen)[0].screen}
+          </Box>
+        </Box>
+
+        <Box sx={{ height: "165px" }}>
           <Divider />
           <Player />
         </Box>
+
         <CaptchaHandler
           value={captchaValue}
           valSetter={setCaptchaValue}
@@ -166,7 +156,9 @@ function App() {
             setCaptcha("")
             setCaptchaValue("")
           }}
-          onSubmit={() => {console.log("submit")}}
+          onSubmit={() => {
+            console.log("submit")
+          }}
         />
       </Box>
     )
