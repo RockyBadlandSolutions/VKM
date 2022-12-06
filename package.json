@@ -30,6 +30,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^7.2.8",
+    "react-use-audio-player": "^1.2.6",
     "redux": "^4.1.2",
     "tauri-plugin-store-api": "github:tauri-apps/tauri-plugin-store",
     "web-vitals": "^2.1.4"

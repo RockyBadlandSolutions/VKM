@@ -1,4 +1,4 @@
-import { Avatar, Box, IconButton, Slider, Typography } from "@mui/material"
+import { Avatar, IconButton, Slider, Tooltip, Typography, SliderRail, Box } from "@mui/material"
 import {
   Icon20VolumeOutline,
   Icon24PauseCircle,
@@ -8,6 +8,7 @@ import {
   Icon24Shuffle,
   Icon24SkipBack,
   Icon24SkipForward,
+  Icon56MusicOutline
 } from "@vkontakte/icons"
 import { useEffect, useState } from "react"
 import { Audio as AudioType } from "../API/audio"
@@ -27,6 +28,39 @@ const sxStyles = {
   },
 }
 
+function relativeCoords ( event: any ) {
+  const bounds = event.target.getBoundingClientRect();
+  const x = event.clientX - bounds.left;
+  const y = event.clientY - bounds.top;
+  return {x: x, y: y};
+}
+
+const CustomRail = (props: {
+  color?: string;
+  value: number;
+  min?: number;
+  max?: number;
+}) => {
+  let calculatedWidth = (props.value - (props.min || 0)) / (props.max || 100);
+  if (calculatedWidth > 1) calculatedWidth = 1;
+
+  return (
+    <SliderRail {...props} style={{
+      backgroundColor: "#9cc7f7"
+    }}
+    >
+      <div
+        style={{
+          width: `${calculatedWidth * 100}%`,
+          height: "100%",
+          backgroundColor: "#0077ff",
+          transition: "width 300ms ease-in-out",
+        }}
+      />
+    </SliderRail>
+  );
+};
+
 function Player() {
   const dispatch = useAppDispatch()
   const currentSong = useAppSelector(
@@ -40,7 +74,13 @@ function Player() {
   const [songName, setSongName] = useState("")
   const [songArtist, setSongArtist] = useState("")
   const [artworkURL, setArtworkURL] = useState("")
-
+  const [seeking, setSeeking] = useState(false)
+  const [seekValue, setSeekValue] = useState(0)
+  const [bufferedSecs, setBufferedSecs] = useState(0)
+  const [showTooltip, setShowTooltip] = useState(false)
+  const [tooltipValue, setTooltipValue] = useState(0)
+  const [playPromise, setPlayPromise] = useState<Promise<void> | null>(null)
+  
   const [
     playing,
     currentTime,
@@ -49,8 +89,10 @@ function Player() {
     pause,
     updateTime,
     updateVolume,
+    changeSource,
+    buffered,
     player,
-  ] = useAudio(currentSong?.url)
+  ] = useAudio()
 
   useEffect(() => {
     if (currentSong.title) {
@@ -59,12 +101,27 @@ function Player() {
       setArtworkURL(currentSong.album?.thumb?.photo_1200 as string)
       setDuration(currentSong.duration)
       if (player) {
-        player.src = currentSong.url
-        // play()
+        player.pause()
+        dispatch(updatePaused(true))
+        changeSource(currentSong.url)
+        setPlayPromise(play())
         dispatch(updatePaused(false))
       }
     }
   }, [currentSong])
+
+  useEffect(() => {
+    if (player) {
+      if (buffered.length === 0) {
+        setBufferedSecs(0)
+      } else {
+        if (Math.floor(buffered.end(0)) !== bufferedSecs) {
+          setBufferedSecs(Math.floor(buffered.end(0)))
+        }
+      }
+    }
+  }, [buffered])
+
 
   const displayTime = (value: number) => {
     const seconds = Math.floor(value % 60)
@@ -75,12 +132,25 @@ function Player() {
 
   const onPause = () => {
     if (playing) {
-      pause()
+      if (playPromise !== null) {
+        playPromise?.then(_ => {
+          console.log("playPromise")
+          pause()
+          // Automatic playback started!
+          // Show playing UI.
+        })
+          .catch(error => {
+            console.log("playPromise error")
+            console.log(error)
+          // Auto-play was prevented
+          // Show paused UI.
+          });
+      }
       dispatch(updatePaused(true))
     } else {
       play()
-      dispatch(updatePaused(false))
     }
+    dispatch(updatePaused(false))
   }
 
   const onShuffle = () => {
@@ -99,9 +169,24 @@ function Player() {
     }
   }
 
+  const onSliderMouseHover = (event: any) => {
+    const { x } = relativeCoords(event);
+    if (!showTooltip) {
+      setShowTooltip(true)
+    }
+    setTooltipValue(Math.round(x/event.currentTarget.offsetWidth * duration))
+  }
+
   const positionChange = (e: any, val: any) => {
     console.log("positionChange", val)
-    updateTime(val)
+    setSeeking(true)
+    setSeekValue(val)
+  }
+
+  const positionChanged = (e: any, val: any) => {
+    console.log("positionChanged", val)
+    setSeeking(false)
+    updateTime(seekValue)
   }
 
   const volumeChange = (e: any, val: any) => {
@@ -167,12 +252,15 @@ function Player() {
       <Box sx={{ display: "flex" }}>
         <Avatar
           variant="square"
-          src={artworkURL}
+          src={artworkURL ? artworkURL : undefined}
           sx={{
-            width: "165px",
+            width: "200px",
             height: "165px",
           }}
-        />
+        >{
+            artworkURL ? "" : <Icon56MusicOutline/>
+          }
+        </Avatar>
 
         <Box
           sx={{
@@ -195,18 +283,39 @@ function Player() {
             <Typography variant="overline">
               {displayTime(currentTime)}
             </Typography>
+            <Tooltip
+              title={displayTime((seeking) ? seekValue : tooltipValue)}
+              arrow
+              placement="top"
+              open={showTooltip}
+              followCursor
+              disableFocusListener
+              disableHoverListener
+              disableTouchListener
+            >
 
-            <Slider
-              key={currentTime}
-              size="small"
-              max={duration}
-              defaultValue={currentTime}
-              valueLabelFormat={displayTime}
-              valueLabelDisplay="auto"
-              sx={sxStyles.trackSlider}
-              onChangeCommitted={positionChange}
-            />
-
+              {/* Custom track slider with buffer and tooltip */}
+              <Slider
+                slots={{
+                  rail: CustomRail,
+                }}
+                slotProps={{
+                  rail: {
+                    //@ts-ignore
+                    value: bufferedSecs,
+                    max: duration,
+                  },
+                }}
+                max={duration}
+                size="small"
+                value={(seeking) ? seekValue : currentTime}
+                onChange={positionChange}
+                sx={sxStyles.trackSlider}
+                onChangeCommitted={positionChanged}
+                onMouseMove={onSliderMouseHover}
+                onMouseLeave={() => setShowTooltip(false)}
+              />
+            </Tooltip>
             <Typography variant="overline">
               {"−" + displayTime(duration - currentTime)}
             </Typography>
@@ -256,10 +365,12 @@ function Player() {
             orientation="vertical"
             sx={{
               height: "75px",
+              mb: 1,
             }}
           />
           <Icon20VolumeOutline style={sxStyles.positiveButton} />
         </Box>
+            
       </Box>
     )
   }
@@ -277,5 +388,6 @@ const PlayerNotAvailable = () => (
     <Typography variant="h5">Nothing to play</Typography>
   </Box>
 )
+
 
 export default Player

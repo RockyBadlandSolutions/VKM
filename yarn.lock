@@ -2321,6 +2321,11 @@ hoist-non-react-statics@^3.3.0, hoist-non-react-statics@^3.3.1, hoist-non-react-
   dependencies:
     react-is "^16.7.0"
 
+howler@^2.2.1:
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/howler/-/howler-2.2.3.tgz#a2eff9b08b586798e7a2ee17a602a90df28715da"
+  integrity sha512-QM0FFkw0LRX1PR8pNzJVAY25JhIWvbKMBFM4gqk+QdV+kPXOhleWGCB6AiAF/goGjIHK2e/nIElplvjQwhr0jg==
+
 htmlparser2@^3.8.3:
   version "3.10.1"
   resolved "https://registry.yarnpkg.com/htmlparser2/-/htmlparser2-3.10.1.tgz#bd679dc3f59897b6a34bb10749c855bb53a9392f"
@@ -3361,6 +3366,13 @@ react-transition-group@^4.4.5:
     dom-helpers "^5.0.1"
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
+
+react-use-audio-player@^1.2.6:
+  version "1.2.6"
+  resolved "https://registry.yarnpkg.com/react-use-audio-player/-/react-use-audio-player-1.2.6.tgz#e50b6183029493c693c89e5822f8530b7648e864"
+  integrity sha512-ukFF5WOxsFYd44AaPXzFI4HltWaPD68+iJ9aDicn9FRBJ5poJUPO/WjFl5nk0tRYiyve3z711Oz79LYzCahhFQ==
+  dependencies:
+    howler "^2.2.1"
 
 react@^18.2.0:
   version "18.2.0"

@@ -13,6 +13,9 @@ import { useAppSelector, useAppDispatch } from "../store/store"
 import { Audio } from "../API/audio"
 import useVKAPI from "../hooks/useVKAPI"
 import { updateCurrentSong } from "../store/playerStateSlice"
+import {
+  Icon24MusicOutline,
+} from "@vkontakte/icons"
 
 
 function SongList(props : { songs: Audio[], loading: boolean }) {
@@ -55,7 +58,13 @@ const SongEntity = (props: { audio: Audio; playing: boolean }) => {
           </Avatar>
         ) : (
           <ListItemAvatar>
-            <Avatar src={props.audio.album?.thumb?.photo_68} />
+            {(props.audio.album?.thumb?.photo_68) ?
+              <Avatar src={props.audio.album?.thumb?.photo_68} />
+              :
+              <Avatar sx={{ marginRight: "1em" }}>
+                <Icon24MusicOutline/>
+              </Avatar>
+            }
           </ListItemAvatar>
         )}
         <ListItemText

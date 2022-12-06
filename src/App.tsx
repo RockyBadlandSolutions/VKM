@@ -9,6 +9,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Paper,
   TextField,
   Toolbar,
   Typography,
@@ -40,7 +41,7 @@ const sxStyles = {
     "& .MuiDrawer-paper": {
       width: drawerWidth,
       boxSizing: "border-box",
-      height: "calc(100vh - 165px)",
+      height: "calc(100vh - 160px)",
     },
   },
   positive: {
@@ -129,9 +130,12 @@ function App() {
                     onClick={() => dispatch(updateScreen(screen.id))}
                     button
                     selected={screen.id === currentScreen}
+                    sx={{
+                      borderRadius: "8px",
+                    }}
                   >
                     <ListItemIcon>{screen.icon}</ListItemIcon>
-                    <ListItemText primary={screen.name} />
+                    <ListItemText primary={screen.name}/>
                   </ListItem>
                 ))}
               </Box>
@@ -143,16 +147,16 @@ function App() {
           </Box>
         </Box>
 
-        <Box sx={{ 
+        <Paper sx={{ 
           height: "160px", 
           position: "absolute", 
           bottom: 0, 
           width: "100vw",
-          backgroundColor: "#fff",
-        }}>
+          backgroundColor: "background.paper",
+        }} elevation={10}>
           <Divider />
           <Player />
-        </Box>
+        </Paper>
 
         <CaptchaHandler
           value={captchaValue}
