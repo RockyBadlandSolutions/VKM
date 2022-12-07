@@ -3,7 +3,7 @@
 
 VKM это десктопный музыкальный плеер для VK.com, написанный на React с использованием Rust-tauri.
 
-
+![Скриншот](https://github.com/faglo/VKM/raw/main/screenshot.jpeg)
 
 
 ## Компиляция
