@@ -1,10 +1,10 @@
 import {createSlice} from "@reduxjs/toolkit";
 
-interface appState {
-  screen?: string
-  logged_in?: boolean,
-  search?: string,
-}
+// interface appState {
+//   screen?: string
+//   logged_in?: boolean,
+//   search?: string,
+// }
 
 const initialState = {
   screen: "main",
