@@ -1,4 +1,4 @@
-import { Avatar, IconButton, Slider, Tooltip, Typography, SliderRail, Box } from "@mui/material"
+import { Avatar, IconButton, Slider, Tooltip, Typography, SliderRail, Box, Stack } from "@mui/material"
 import {
   Icon20VolumeOutline,
   Icon24PauseCircle,
@@ -10,11 +10,12 @@ import {
   Icon24SkipForward,
   Icon56MusicOutline
 } from "@vkontakte/icons"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Audio as AudioType } from "../API/audio"
 import useAudio from "../hooks/useAudio"
-import { updatePaused } from "../store/playerStateSlice"
+import { updatePaused, updateCurrentSong } from "../store/playerStateSlice"
 import { useAppDispatch, useAppSelector } from "../store/store"
+import Zoom from "@mui/material/Zoom";
 
 const sxStyles = {
   trackSlider: {
@@ -31,7 +32,7 @@ const sxStyles = {
 function relativeCoords ( event: any ) {
   const bounds = event.target.getBoundingClientRect();
   const x = event.clientX - bounds.left;
-  const y = event.clientY - bounds.top;
+  const y = bounds.top;
   return {x: x, y: y};
 }
 
@@ -66,6 +67,7 @@ function Player() {
   const currentSong = useAppSelector(
     (state) => state.playerState.currentSong
   ) as AudioType
+  const playlist = useAppSelector((state) => state.playerState.playlist)
 
   const [repeatMode, setRepeatMode] = useState(0)
   const [shuffle, setShuffle] = useState(false)
@@ -80,6 +82,7 @@ function Player() {
   const [showTooltip, setShowTooltip] = useState(false)
   const [tooltipValue, setTooltipValue] = useState(0)
   const [playPromise, setPlayPromise] = useState<Promise<void> | null>(null)
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
   
   const [
     playing,
@@ -122,9 +125,30 @@ function Player() {
     }
   }, [buffered])
 
+  useEffect(() => {
+    if (player) {
+      player.onended = () => {
+        if (repeatMode === 0) {
+          nextSong()
+        } else if (repeatMode === 1) {
+          dispatch(updateCurrentSong(currentSong))
+          play()
+        } else if (repeatMode === 2) {
+          nextSong()
+        }
+      }
+    }
+  })
+
+  const popperRef = useRef<any>(null);
+  const areaRef = useRef<HTMLDivElement>(null);
+
 
   const displayTime = (value: number) => {
     const seconds = Math.floor(value % 60)
+    if (seconds < 0) {
+      return Math.floor(duration % 60)
+    }
     return (
       Math.floor(value / 60) + ":" + (seconds < 10 ? "0" + seconds : seconds)
     )
@@ -133,17 +157,11 @@ function Player() {
   const onPause = () => {
     if (playing) {
       if (playPromise !== null) {
-        playPromise?.then(_ => {
-          console.log("playPromise")
+        playPromise?.then(() => {
           pause()
-          // Automatic playback started!
-          // Show playing UI.
         })
           .catch(error => {
-            console.log("playPromise error")
             console.log(error)
-          // Auto-play was prevented
-          // Show paused UI.
           });
       }
       dispatch(updatePaused(true))
@@ -174,24 +192,29 @@ function Player() {
     if (!showTooltip) {
       setShowTooltip(true)
     }
+    if (x < 0) {
+      setShowTooltip(false)
+      return
+    }
     setTooltipValue(Math.round(x/event.currentTarget.offsetWidth * duration))
+    setTooltipPosition({
+      x: event.clientX,
+      y: areaRef.current?.getBoundingClientRect().top || 0,
+    })
   }
 
   const positionChange = (e: any, val: any) => {
-    console.log("positionChange", val)
     setSeeking(true)
     setSeekValue(val)
   }
 
-  const positionChanged = (e: any, val: any) => {
-    console.log("positionChanged", val)
+  const positionChanged = () => {
     setSeeking(false)
     updateTime(seekValue)
   }
 
   const volumeChange = (e: any, val: any) => {
     updateVolume(val)
-    console.log("volumeChange", val)
   }
 
   const RepeatButton = () => {
@@ -245,6 +268,205 @@ function Player() {
     }
   }
 
+  const nextSong = () => {
+    if (shuffle) {
+      // @ts-ignore
+      const randomIndex = Math.floor(Math.random() * playlist?.music.length)
+      dispatch(updateCurrentSong(playlist?.music[randomIndex]))
+    } else {
+      const currentIndex = playlist?.music.findIndex(
+        (song) => song.id === currentSong.id
+      )
+      // @ts-ignore
+      if (currentIndex === playlist?.music.length - 1) {
+        if (repeatMode === 2) {
+          dispatch(updateCurrentSong(playlist?.music[0]))
+        }
+      } else {
+        // @ts-ignore
+        dispatch(updateCurrentSong(playlist?.music[currentIndex + 1]))
+      }
+    }
+
+    if (!currentSong.title) {
+      return <PlayerNotAvailable />
+    } else {
+      return (
+        <Box sx={{ display: "flex" }}>
+          <Avatar
+            variant="square"
+            src={artworkURL ? artworkURL : undefined}
+            sx={{
+              width: "200px",
+              height: "165px",
+            }}
+          >{
+              artworkURL ? "" : <Icon56MusicOutline/>
+            }
+          </Avatar>
+
+          <Box
+            sx={{
+              p: 2,
+              flexGrow: 1,
+              display: "flex",
+              justifyContent: "center",
+              flexDirection: "column",
+            }}
+          >
+            <Typography variant="h6" noWrap>
+              {songName}
+            </Typography>
+
+            <Typography variant="subtitle1" noWrap>
+              {songArtist}
+            </Typography>
+
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography variant="overline">
+                {displayTime(currentTime)}
+              </Typography>
+              <Tooltip
+                title={displayTime((seeking) ? seekValue : tooltipValue)}
+                arrow
+                placement="top"
+                open={showTooltip}
+                TransitionComponent={Zoom}
+                disableFocusListener
+                disableHoverListener
+                disableTouchListener
+                PopperProps={{
+                  popperRef,
+                  anchorEl: {
+                    getBoundingClientRect: () => {
+                      return new DOMRect(
+                        tooltipPosition.x,
+                        tooltipPosition.y,
+                        0,
+                        0,
+                      );
+                    },
+                  },
+                }}
+                components={{Tooltip: Stack}}
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      backdropFilter: "blur(5px)",
+                      borderRadius: "10px",
+                      px: 1,
+                      pb: 0.5,
+                    },
+                  },
+                }}
+              >
+
+                {/* Custom track slider with buffer and tooltip */}
+                <Slider
+                  ref={areaRef}
+                  slots={{
+                    rail: CustomRail,
+                  }}
+                  slotProps={{
+                    rail: {
+                    //@ts-ignore
+                      value: bufferedSecs,
+                      max: duration,
+                    },
+                  }}
+                  max={duration}
+                  size="small"
+                  value={(seeking) ? seekValue : currentTime}
+                  onChange={positionChange}
+                  sx={sxStyles.trackSlider}
+                  onChangeCommitted={positionChanged}
+                  onMouseMove={onSliderMouseHover}
+                  onMouseLeave={() => setShowTooltip(false)}
+                />
+              </Tooltip>
+              <Typography variant="overline">
+                {"−" + displayTime(duration - currentTime)}
+              </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <RepeatButton />
+
+              <Box>
+                <IconButton size="medium">
+                  <Icon24SkipBack style={sxStyles.positiveButton} />
+                </IconButton>
+
+                <PlayButton />
+
+                <IconButton size="medium">
+                  <Icon24SkipForward style={sxStyles.positiveButton} />
+                </IconButton>
+              </Box>
+
+              <ShuffleButton />
+            </Box>
+          </Box>
+
+          <Box
+            sx={{
+              p: 2,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Slider
+              size={"small"}
+              onChange={volumeChange}
+              value={volume}
+              max={1}
+              step={0.01}
+              orientation="vertical"
+              sx={{
+                height: "75px",
+                mb: 1,
+              }}
+            />
+            <Icon20VolumeOutline style={sxStyles.positiveButton} />
+          </Box>
+            
+        </Box>
+      )
+    }
+  }
+
+  const previousSong = () => {
+    if (currentTime > 5) {
+      updateTime(0)
+      return
+    }
+    if (shuffle) {
+      // @ts-ignore
+      const randomIndex = Math.floor(Math.random() * playlist?.music.length)
+      dispatch(updateCurrentSong(playlist?.music[randomIndex]))
+    } else {
+      const currentIndex = playlist?.music.findIndex(
+        (song) => song.id === currentSong.id
+      )
+      // @ts-ignore
+      if (currentIndex === 0) {
+        dispatch(updateCurrentSong(playlist?.music[playlist?.music.length - 1]))
+      } else {
+        // @ts-ignore
+        dispatch(updateCurrentSong(playlist?.music[currentIndex - 1]))
+      }
+    }
+  }
+
   if (!currentSong.title) {
     return <PlayerNotAvailable />
   } else {
@@ -288,14 +510,39 @@ function Player() {
               arrow
               placement="top"
               open={showTooltip}
-              followCursor
+              TransitionComponent={Zoom}
               disableFocusListener
               disableHoverListener
               disableTouchListener
+              PopperProps={{
+                popperRef,
+                anchorEl: {
+                  getBoundingClientRect: () => {
+                    return new DOMRect(
+                      tooltipPosition.x,
+                      tooltipPosition.y,
+                      0,
+                      0,
+                    );
+                  },
+                },
+              }}
+              components={{Tooltip: Stack}}
+              componentsProps={{
+                tooltip: {
+                  sx: {
+                    backdropFilter: "blur(5px)",
+                    borderRadius: "10px",
+                    px: 1,
+                    pb: 0.5,
+                  },
+                },
+              }}
             >
 
               {/* Custom track slider with buffer and tooltip */}
               <Slider
+                ref={areaRef}
                 slots={{
                   rail: CustomRail,
                 }}
@@ -332,13 +579,13 @@ function Player() {
             <RepeatButton />
 
             <Box>
-              <IconButton size="medium">
+              <IconButton size="medium" onClick={()=> previousSong()}>
                 <Icon24SkipBack style={sxStyles.positiveButton} />
               </IconButton>
 
               <PlayButton />
 
-              <IconButton size="medium">
+              <IconButton size="medium" onClick={()=> nextSong()}>
                 <Icon24SkipForward style={sxStyles.positiveButton} />
               </IconButton>
             </Box>

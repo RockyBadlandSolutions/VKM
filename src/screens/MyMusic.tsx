@@ -24,9 +24,7 @@ function MyMusic() {
   }, [loading, api])
 
   return (
-    <Box>
-      <SongList songs={songs} loading={loading} />
-    </Box>
+    <SongList songs={songs} loading={loading} from={"MyMusic"} />
   )
 }
 export default MyMusic

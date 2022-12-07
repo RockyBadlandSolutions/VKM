@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import {
   Avatar,
   Divider,
@@ -12,25 +12,54 @@ import { Icon24Play } from "@vkontakte/icons"
 import { useAppSelector, useAppDispatch } from "../store/store"
 import { Audio } from "../API/audio"
 import useVKAPI from "../hooks/useVKAPI"
-import { updateCurrentSong } from "../store/playerStateSlice"
+import { updateCurrentSong, updatePlaylist } from "../store/playerStateSlice"
 import {
   Icon24MusicOutline,
 } from "@vkontakte/icons"
 
 
-function SongList(props : { songs: Audio[], loading: boolean }) {
+function SongList(props : { songs: Audio[], loading: boolean, from: string }) {
   const currentSong = useAppSelector((state) => state.playerState.currentSong) as Audio
+  const dispatch = useAppDispatch()
+  
+  const [api] = useVKAPI();
+  const playlist = useAppSelector((state) => state.playerState.playlist)
+
+  useEffect(() => {
+    if (api && props.songs.length > 0) {
+      if (props.from === playlist?.from) {
+        return
+      }
+      api.audioGetById(props.songs.map((obj: Audio) => obj.owner_id.toString() + "_" + obj.id.toString()))
+        .then((r) => {
+          dispatch(
+            updatePlaylist({
+              from: props.from,
+              music: r
+            })
+          )
+        })
+    }
+  }, [props.from, api, playlist?.from, props.songs])
+
+  const onSongClick = (audio: Audio) => {
+    dispatch(
+      updateCurrentSong(audio)
+    )
+  }
 
   return (
-    <List sx={{ maxHeight: "calc(100vh - 8vh)", overflow: "auto" }}>
-      {props.loading ? (
+    <List sx={{ maxHeight: "calc(100vh - 160px)", overflow: "auto" }}>
+      {(props.loading || !playlist?.music) ? (
         <Skeletons />
       ) : (
-        props.songs.map((obj: Audio, index: number) => (
+        playlist?.music.map((obj: Audio, index: number) => (
           <SongEntity
             audio={obj}
             key={index}
             playing={currentSong.id === obj.id}
+            from={props.from}
+            onClick={() => onSongClick(obj)}
           />
         ))
       )}
@@ -38,20 +67,10 @@ function SongList(props : { songs: Audio[], loading: boolean }) {
   )
 }
 
-const SongEntity = (props: { audio: Audio; playing: boolean }) => {
-  const dispatch = useAppDispatch()
-  const [api, _] = useVKAPI();
-  const onSongClick = () => {
-    if (api) {
-      api.audioGetById([props.audio.owner_id.toString() + "_" +props.audio.id.toString()])
-        .then((r) => {
-          dispatch(updateCurrentSong(r[0]))
-        })
-    }
-  }
+const SongEntity = (props: { audio: Audio; playing: boolean, from: string, onClick: any }) => {
   return(
     <>
-      <ListItem button onClick={() => onSongClick()}>
+      <ListItem button onClick={() => props.onClick()}>
         {props.playing ? (
           <Avatar sx={{ marginRight: "1em" }}>
             <Icon24Play style={{ color: "#0077ff" }} />

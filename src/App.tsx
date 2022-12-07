@@ -142,18 +142,13 @@ function App() {
             </List>
           </Drawer>
 
-          <Box component="main" sx={{ flexGrow: 1 }}>
+          <Box component="div" sx={{ flexGrow: 1 }}>
             {screens.filter((id) => id.id === currentScreen)[0].screen}
           </Box>
         </Box>
 
-        <Paper sx={{ 
-          height: "160px", 
-          position: "absolute", 
-          bottom: 0, 
-          width: "100vw",
-          backgroundColor: "background.paper",
-        }} elevation={10}>
+        <Paper 
+          elevation={10}>
           <Divider />
           <Player />
         </Paper>

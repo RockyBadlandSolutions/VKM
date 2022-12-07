@@ -3,7 +3,11 @@ import { Audio } from "../API/audio";
 
 interface playerState {
   currentSong?: Audio
-  paused?: boolean
+  paused?: boolean,
+  playlist?: {
+    from: string,
+    music: Audio[],
+  }
 }
 const initialState: playerState = {
   currentSong: {
@@ -25,6 +29,10 @@ const initialState: playerState = {
     track_code: "",
     url: "",
   },
+  playlist: {
+    from: "",
+    music: [],
+  },
   paused: true
 }
 
@@ -37,10 +45,13 @@ export const playerStateSlice = createSlice({
     },
     updatePaused: (state, action) => {
       state.paused = action.payload
-    }
+    },
+    updatePlaylist: (state, action) => {
+      state.playlist = action.payload
+    },
   }
 })
 
-export const {updateCurrentSong, updatePaused} = playerStateSlice.actions
+export const {updateCurrentSong, updatePaused, updatePlaylist} = playerStateSlice.actions
 
 export default playerStateSlice.reducer
