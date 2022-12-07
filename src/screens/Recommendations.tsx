@@ -4,7 +4,7 @@ import SongList from "../components/SongList"
 import { Audio } from "../API/audio"
 import useVKAPI from "../hooks/useVKAPI"
 
-function MyMusic() {
+function Recommendations() {
   const [songs, setSongs] = useState<Audio[]>([])
   const [loading, setLoading] = useState(true)
   const [api] = useVKAPI()
@@ -13,7 +13,7 @@ function MyMusic() {
   useEffect(() => {
     if (loading) {
       if (api) {
-        api.audioGetSelf().then((r) => {
+        api.audioGetRecommendations().then((r) => {
           setSongs(r)
           setLoading(false)
         })
@@ -23,7 +23,7 @@ function MyMusic() {
   }, [loading, api])
 
   return (
-    <SongList songs={songs} loading={loading} from={"MyMusic"} />
+    <SongList songs={songs} loading={loading} from={"Recommendations"} />
   )
 }
-export default MyMusic
+export default Recommendations

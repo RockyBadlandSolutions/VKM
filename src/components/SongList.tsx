@@ -25,35 +25,73 @@ function SongList(props : { songs: Audio[], loading: boolean, from: string }) {
   const [api] = useVKAPI();
   const playlist = useAppSelector((state) => state.playerState.playlist)
 
+  const playlistUpd = () => {
+    if (api && props.songs.length > 0) {
+      if (props.from === playlist?.from) {
+        return
+      }
+      if (props.from === "Recommendations" || props.from === "Current") {
+        dispatch(
+          updatePlaylist({
+            from: props.from,
+            music: props.songs,
+            displayedPlaylist: props.songs
+          })
+        )
+        return;
+      }
+      if (props.from === "MyMusic") {
+        dispatch(
+          updatePlaylist({
+            from: props.from,
+            music: playlist?.displayedPlaylist,
+            displayedPlaylist: playlist?.displayedPlaylist
+          })
+        )
+      }
+    }
+  }
   useEffect(() => {
     if (api && props.songs.length > 0) {
       if (props.from === playlist?.from) {
         return
       }
-      api.audioGetById(props.songs.map((obj: Audio) => obj.owner_id.toString() + "_" + obj.id.toString()))
-        .then((r) => {
-          dispatch(
-            updatePlaylist({
-              from: props.from,
-              music: r
-            })
-          )
+      if (props.from === "MyMusic") {
+        api.audioGetById(props.songs.map((obj: Audio) => obj.owner_id.toString() + "_" + obj.id.toString()))
+          .then((r) => {
+            dispatch(
+              updatePlaylist({
+                ...playlist,
+                displayedPlaylist: r
+              })
+            )
+          })
+        return;
+      }
+      dispatch(
+        updatePlaylist({
+          ...playlist,
+          displayedPlaylist: props.songs
         })
+      )
     }
   }, [props.from, api, playlist?.from, props.songs])
 
   const onSongClick = (audio: Audio) => {
+    if (props.from !== playlist?.from) {
+      playlistUpd()
+    }
     dispatch(
       updateCurrentSong(audio)
     )
   }
 
   return (
-    <List sx={{ maxHeight: "calc(100vh - 160px)", overflow: "auto" }}>
+    <List sx={currentSong.title ? { maxHeight: "calc(100vh - 160px)" , overflow: "auto" } : { maxHeight: "100vh", overflow: "auto" }}>
       {(props.loading || !playlist?.music) ? (
         <Skeletons />
       ) : (
-        playlist?.music.map((obj: Audio, index: number) => (
+        playlist?.displayedPlaylist.map((obj: Audio, index: number) => (
           <SongEntity
             audio={obj}
             key={index}
@@ -117,4 +155,4 @@ const Skeletons = () => {
   )
 }
 
-export default SongList
+export default SongList;

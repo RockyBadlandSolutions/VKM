@@ -1,5 +1,4 @@
 import { Body, fetch, ResponseType } from "@tauri-apps/api/http"
-import { mytoken } from "../token"
 import { Audio } from "./audio"
 
 const API_URL = "https://api.vk.com/method"

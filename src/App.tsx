@@ -19,6 +19,8 @@ import {
   Icon28Music,
   Icon28Search,
   Icon28Settings,
+  Icon28SparkleOutline,
+  Icon28NewsfeedMusicNoteOutline
 } from "@vkontakte/icons"
 import { useEffect, useState } from "react"
 import CaptchaHandler from "./components/CaptchaHandler"
@@ -27,8 +29,10 @@ import useLocalStore from "./hooks/useLocalStore"
 import useVKAPI from "./hooks/useVKAPI"
 import Login from "./screens/Login"
 import MyMusic from "./screens/MyMusic"
+import Recommendations from "./screens/Recommendations"
 import Search from "./screens/Search"
 import Settings from "./screens/Settings"
+import CurrentPlaylist from "./screens/CurrentPlaylist"
 import { updateScreen, updateSearch } from "./store/appStateSlice"
 import { useAppDispatch, useAppSelector } from "./store/store"
 
@@ -53,28 +57,42 @@ function App() {
   const dispatch = useAppDispatch()
   const currentScreen = useAppSelector((state) => state.appState.screen)
   const isLoggedIn = useAppSelector((state) => state.appState.logged_in)
+  const currentSong = useAppSelector(
+    (state) => state.playerState.currentSong
+  )
   const [api] = useVKAPI()
   const [loginState, setLoginState] = useState(false)
   const [localStore] = useLocalStore("token", "", ".vkm")
-  // const isLoggedIn = true;
   const screens = [
     {
+      id: "nowPlaying",
+      name: "Плейлист",
+      icon: <Icon28NewsfeedMusicNoteOutline style={sxStyles.positive} />,
+      screen: <CurrentPlaylist/>,
+    },
+    {
       id: "main",
-      name: "My music",
+      name: "Моя музыка",
       icon: <Icon28Music style={sxStyles.positive} />,
       screen: <MyMusic />,
     },
     {
-      id: "settings",
-      name: "Settings",
-      icon: <Icon28Settings style={sxStyles.positive} />,
-      screen: <Settings />,
+      id: "recommendations",
+      name: "Рекомендации",
+      icon: <Icon28SparkleOutline style={sxStyles.positive} />,
+      screen: <Recommendations />,
     },
     {
       id: "search",
-      name: "Search",
+      name: "Поиск",
       icon: <Icon28Search style={sxStyles.positive} />,
       screen: <Search />,
+    },
+    {
+      id: "settings",
+      name: "Настройки",
+      icon: <Icon28Settings style={sxStyles.positive} />,
+      screen: <Settings />,
     },
   ]
 
@@ -97,7 +115,9 @@ function App() {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
         <Box sx={{ display: "flex", flexGrow: 1 }}>
-          <Drawer sx={sxStyles.drawer} variant={"permanent"}>
+          <Drawer 
+            sx={sxStyles.drawer}
+            variant={"permanent"}>
             <Toolbar>
               <Grid container justifyContent="center">
                 <Typography variant="h5">VKM</Typography>
@@ -134,8 +154,14 @@ function App() {
                       borderRadius: "8px",
                     }}
                   >
-                    <ListItemIcon>{screen.icon}</ListItemIcon>
-                    <ListItemText primary={screen.name}/>
+                    <ListItemIcon
+                      sx={{
+                        ml: "-5px"
+                      }}
+                    >{screen.icon}</ListItemIcon>
+                    <ListItemText primary={screen.name} sx={{
+                      ml: "-15px"
+                    }}/>
                   </ListItem>
                 ))}
               </Box>
@@ -146,12 +172,26 @@ function App() {
             {screens.filter((id) => id.id === currentScreen)[0].screen}
           </Box>
         </Box>
+        {currentSong?.title ? (
+          <Paper elevation={10} sx={{backgroundColor: "background.primary"}}>
+            <Divider />
+            <Player />
+          </Paper>
+        ) : (
+          <div style={{
+            height: "100%",
+            width: drawerWidth,
+            borderRight: "1px solid rgba(255, 255, 255, 0.12)",
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+          }}>
+            <br />
+          </div>
+        )
+      
+        }
 
-        <Paper 
-          elevation={10}>
-          <Divider />
-          <Player />
-        </Paper>
 
         <CaptchaHandler
           value={captchaValue}

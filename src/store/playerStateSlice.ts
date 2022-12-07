@@ -7,6 +7,7 @@ interface playerState {
   playlist?: {
     from: string,
     music: Audio[],
+    displayedPlaylist: Audio[],
   }
 }
 const initialState: playerState = {
@@ -32,6 +33,7 @@ const initialState: playerState = {
   playlist: {
     from: "",
     music: [],
+    displayedPlaylist: [],
   },
   paused: true
 }
