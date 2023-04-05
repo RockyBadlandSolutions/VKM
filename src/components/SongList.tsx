@@ -134,25 +134,25 @@ const SongEntity = (props: { audio: Audio; playing: boolean, from: string, onCli
   )
 }
 
+
+// Skeletons with text and description and avatar 10 items
 const Skeletons = () => {
   return (
     <>
-      {[...Array(8)].map((_, i: number) => (
-        <div key={i}>
-          <ListItem>
-            <ListItemAvatar>
-              <Skeleton variant="circular" width={40} height={40} />
-            </ListItemAvatar>
-            <ListItemText
-              primary={<Skeleton variant="text" width={200} />}
-              secondary={<Skeleton variant="text" width={200} />}
-            />
-          </ListItem>
-          <Divider />
-        </div>
+      {[...Array(10)].map((e, i) => (
+        <ListItem key={i}>
+          <ListItemAvatar>
+            <Skeleton variant="circular" width={40} height={40} />
+          </ListItemAvatar>
+          <ListItemText
+            primary={<Skeleton width="60%" />}
+            secondary={<Skeleton width="40%" />}
+          />
+        </ListItem>
       ))}
     </>
   )
 }
+
 
 export default SongList;

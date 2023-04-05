@@ -20,7 +20,7 @@ const Search = () => {
       })
     }
   }, [search])
-  return <SongList songs={songs} loading={loading} />
+  return <SongList songs={songs} loading={loading} from={"MyMusic"}/>
 }
 
 export default Search
